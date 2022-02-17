@@ -4,16 +4,17 @@ set -ex
 
 python scripts/fact_verification.py \
   --model_name_or_path tals/albert-base-vitaminc-fever \
-  --tasks_names vitaminc \
+  --tasks_names custom \
   --data_dir data \
   --do_test \
   --max_seq_length 256 \
   --per_device_train_batch_size 32 \
-  --per_device_eval_batch_size 128 \
+  --per_device_eval_batch_size 32 \
   --learning_rate 2e-5 \
   --max_steps 50000 \
   --save_step 10000 \
   --overwrite_cache \
+  --do_predict\
   --output_dir results/vitaminc_albert_base \
   "$@"
 
