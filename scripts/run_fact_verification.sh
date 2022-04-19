@@ -3,8 +3,8 @@
 set -ex
 
 python scripts/fact_verification.py \
-  --model_name_or_path models/fever \
-  --tasks_names fever \
+  --model_name_or_path tals/albert-base-vitaminc \
+  --tasks_names custom \
   --data_dir data \
   --do_test \
   --max_seq_length 256 \
@@ -15,7 +15,7 @@ python scripts/fact_verification.py \
   --save_step 10000 \
   --overwrite_cache \
   --do_predict\
-  --output_dir results/fever_albert \
+  --output_dir results/new/fever_only/ns-jaccard-overlap-fever-dev \
   "$@"
 
   #--fp16 \
@@ -26,3 +26,6 @@ python scripts/fact_verification.py \
   #--model_name_or_path albert-base-v2 \
   #--do_eval \
   #--eval_all_checkpoints \
+
+
+  #if this is broken, check you've got transformers==4.6.0

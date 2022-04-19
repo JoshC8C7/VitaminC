@@ -191,6 +191,9 @@ def main():
             highest_acc = 0
             for ckpt in checkpoints:
                 model = AutoModelForSequenceClassification.from_pretrained(ckpt)
+
+                print(model.config_class)
+
                 trainer = Trainer(
                     model=model,
                     args=training_args,
