@@ -18,7 +18,8 @@ from torch.utils.data.dataset import Dataset
 
 from filelock import FileLock
 
-from transformers import InputExample, PreTrainedTokenizerBase, InputFeatures
+from transformers import PreTrainedTokenizerBase
+from vitaminc.modeling.custom_trainer import NewInputExample, NewInputFeatures
 
 from vitaminc.processing.utils import download_and_extract, convert_examples_to_features
 from vitaminc.processing.processor import VitCProcessor
@@ -26,6 +27,22 @@ from vitaminc.processing.processor import VitCProcessor
 
 logger = logging.getLogger(__name__)
 
+BIASES_DICT = {
+    "known_ent_overweight":"ent_overlap_biases",
+    "known_neg_mismatch":"neg_overlap_biases",
+    "known_range_overlap":"range_biases",
+    "known_sbert_sim":"sbert_biases",
+    "self_ent_overweight":"",
+    "self_neg_mismatch":"",
+    "self_range_overlap":"",
+    "self_num_mismatch":"",
+}
+
+def get_bias(bias_name):
+    bias = BIASES_DICT.get(bias_name,None)
+    if bias is None and bias_name is not None:
+        print("No entry found for "+bias_name +" . Choose one of" + ", ".join(BIASES_DICT.keys()))
+    return bias
 
 class VitCFactVerificationProcessor(VitCProcessor):
     def __init__(self, claim_only=False):
@@ -35,10 +52,11 @@ class VitCFactVerificationProcessor(VitCProcessor):
         """See base class."""
         return ["SUPPORTS", "REFUTES", "NOT ENOUGH INFO"]
 
-    def _create_examples(self, lines, set_type):
+    def _create_examples(self, lines, set_type, biases_lines=None, teaches_lines=None):
         """Creates examples for the training, dev and test sets."""
         examples = []
-        for (i, line) in enumerate(lines):
+        #for (i, (line,bias)) in enumerate(zip(lines,biases_lines)):
+        for i, line in enumerate(lines):
             if 'unique_id' in line:
                 guid = line['unique_id']
             else:
@@ -56,9 +74,11 @@ class VitCFactVerificationProcessor(VitCProcessor):
                 label = line['label']
             else:
                 label = None
+            bias = biases_lines[str(i)] if biases_lines else None
+            teach = teaches_lines[str(i)] if teaches_lines else None
 
             examples.append(
-                InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
+                NewInputExample(guid=guid, text_a=text_a, text_b=text_b, label=label,bias=bias, teach=teach))
         return examples
 
 
@@ -145,7 +165,7 @@ class Split(Enum):
 class VitCDataset(Dataset):
     args: VitCDataTrainingArguments
     output_mode: str
-    features: List[InputFeatures]
+    features: List[NewInputFeatures]
 
     def __init__(
         self,
@@ -154,6 +174,8 @@ class VitCDataset(Dataset):
         mode: Union[str, Split] = Split.train,
         cache_dir: Optional[str] = None,
         file_path: Optional[str] = None,
+        bias_name: Optional[str] = None,
+        use_teach: Optional[bool] = False
     ):
         """
         The dataset will bbe created either from file_path or
@@ -194,6 +216,7 @@ class VitCDataset(Dataset):
         lock_path = cached_features_file + ".lock"
         with FileLock(lock_path):
             if os.path.exists(cached_features_file) and not args.overwrite_cache:
+                # read features from cache:
                 start = time.time()
                 self.features = torch.load(cached_features_file)
                 logger.info(
@@ -208,22 +231,31 @@ class VitCDataset(Dataset):
                     get_examples = self.processor.get_train_examples
 
                 if file_path is not None:
+                    #Biases will be stored with the cache, no need for special handling
                     examples = self.processor.get_examples_from_file(file_path, mode)
                 else:
                     examples = []
                     for task, ratio in zip(args.tasks_names, args.tasks_ratios):
                         task_data_dir = os.path.join(args.data_dir, task)
+                        if bias_name:
+                            bias_data_dir = os.path.join(args.data_dir, 'biases', task, "train", get_bias(bias_name)+'.json')
+                        else:
+                            bias_data_dir = None
+
+                        if use_teach:
+                            teach_data_dir = os.path.join(args.data_dir, 'teaches', task+'_alb_base.json')
+                        else: teach_data_dir = None
+
                         if not os.path.exists(task_data_dir):
                             download_and_extract(task, args.data_dir)
                         logger.info(f"Collecting {mode.value} examples (ratio={ratio}) from dataset file at {task_data_dir}")
-                        task_examples = get_examples(task_data_dir)
+                        task_examples = get_examples(task_data_dir,bias_data_dir,teach_data_dir)
                         if args.dataset_size is not None:
                             random.shuffle(task_examples)
                             if ratio != -1:
                                 task_examples = task_examples[:int(args.dataset_size * ratio)]
 
                         examples.extend(task_examples)
-
                 self.features = convert_examples_to_features(
                     examples,
                     tokenizer,
@@ -240,7 +272,7 @@ class VitCDataset(Dataset):
     def __len__(self):
         return len(self.features)
 
-    def __getitem__(self, i) -> InputFeatures:
+    def __getitem__(self, i) -> NewInputFeatures:
         return self.features[i]
 
     def get_labels(self):

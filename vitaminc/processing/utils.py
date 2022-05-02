@@ -5,7 +5,8 @@ import logging
 import jsonlines
 from typing import List, Optional, Union
 
-from transformers import InputExample, PreTrainedTokenizer, InputFeatures
+from transformers import PreTrainedTokenizer
+from vitaminc.modeling.custom_trainer import NewInputExample, NewInputFeatures
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +51,7 @@ def read_jsonlines(input_file):
 
 
 def convert_examples_to_features(
-        examples: List[InputExample],
+        examples: List[NewInputExample],
         tokenizer: PreTrainedTokenizer,
         max_length: Optional[int] = None,
         label_list=None,
@@ -61,9 +62,10 @@ def convert_examples_to_features(
 
     label_map = {label: i for i, label in enumerate(label_list)}
 
-    def label_from_example(example: InputExample) -> Union[int, float, None]:
+    def label_from_example(example: NewInputExample) -> Union[int, float, None]:
         if example.label is None:
             return None
+        #Will always be classification
         if output_mode == "classification":
             return label_map[example.label]
         elif output_mode == "regression":
@@ -71,6 +73,9 @@ def convert_examples_to_features(
         raise KeyError(output_mode)
 
     labels = [label_from_example(example) for example in examples]
+    biases = [example.bias for example in examples]
+    teaches = [example.teach for example in examples]
+
 
     batch_encoding = tokenizer(
         [(example.text_a, example.text_b)
@@ -84,8 +89,7 @@ def convert_examples_to_features(
     features = []
     for i in range(len(examples)):
         inputs = {k: batch_encoding[k][i] for k in batch_encoding}
-
-        feature = InputFeatures(**inputs, label=labels[i])
+        feature = NewInputFeatures(**inputs, label=labels[i],bias=biases[i], teach=teaches[i])
         features.append(feature)
 
     for i, example in enumerate(examples[:5]):
