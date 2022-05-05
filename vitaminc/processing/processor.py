@@ -15,6 +15,7 @@ class VitCProcessor(DataProcessor):
         """See base class."""
         if bias_dir:
             with open(bias_dir,'r') as fp:
+                print("BIASES LOADING: ", bias_dir)
                 bias_lines = json.load(fp)
         else: bias_lines = None
         if teach_dir:

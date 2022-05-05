@@ -3,16 +3,21 @@
 set -ex
 
 python scripts/fact_verification.py \
-  --model_name_or_path models/bias_trained/fever_only/shallow \
-  --tasks_names entity_overweighting_vitc_test_5000 \
+  --model_name_or_path albert-base-v2 \
+  --tasks_names fever \
+  --loss_fn PoE \
+  --bias_name known_ent_overweight\
   --data_dir data \
-  --do_predict \
+  --do_train \
   --max_seq_length 256 \
-  --per_device_train_batch_size 32 \
-  --per_device_eval_batch_size 128 \
+  --per_device_train_batch_size 16 \
+  --per_device_eval_batch_size 32 \
   --learning_rate 2e-5 \
+  --max_steps 50000 \
+  --save_step 10000 \
+  --overwrite_output_dir \
   --overwrite_cache \
-  --output_dir results/shallow_preds/fever_only_shallow/entity_overweighting_vitc_test_5000/ \
+  --output_dir models/bias_trained/fever_only/poe/known_ent_overweight \
   "$@"
 
   #--fp16 \

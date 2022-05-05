@@ -1,5 +1,5 @@
-transformers==4.3.3
-torch==1.8.0
+transformers==4.17.0
+torch==1.7.0
 jsonlines
 tensorboard
 scikit-learn
