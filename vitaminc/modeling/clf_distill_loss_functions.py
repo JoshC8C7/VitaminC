@@ -64,8 +64,6 @@ class DistillLoss(ClfDistillLossFunction):
 
 class SmoothedDistillLoss(ClfDistillLossFunction):
     def forward(self, hidden, logits, bias, teacher_probs, labels):
-
-        print("BIASBIASBIAS", type(bias),bias.size())
         softmaxf = torch.nn.Softmax(dim=1)
         probs = softmaxf(logits)
         
@@ -206,8 +204,9 @@ class BiasProductByTeacherAnnealed(ClfDistillLossFunction):
         super().__init__()
         self.max_theta = max_theta
         self.min_theta = min_theta
-        self.num_train_optimization_steps = total_steps
-        self.num_epochs = num_epochs
+        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\LEAHLEAHLEAHLEAH\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
+        self.num_train_optimization_steps = 6
+        self.num_epochs = 7
         self.current_step = 0
 
     def get_current_theta(self):
@@ -231,12 +230,12 @@ class BiasProductByTeacherAnnealed(ClfDistillLossFunction):
 
 class ReweightByTeacherAnnealed(ClfDistillLossFunction):
     def __init__(self, max_theta=1.0, min_theta=0.8,
-                 total_steps=12272, num_epochs=3):
+                 total_steps=50000, num_epochs=3):
         super().__init__()
         self.max_theta = max_theta
         self.min_theta = min_theta
-        self.num_train_optimization_steps = total_steps
-        self.num_epochs = num_epochs
+        self.num_train_optimization_steps = 5
+        self.num_epochs = 10
         self.current_step = 0
 
     def get_current_theta(self):

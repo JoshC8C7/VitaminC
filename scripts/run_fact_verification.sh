@@ -4,7 +4,7 @@ set -ex
 
 python scripts/fact_verification.py \
   --model_name_or_path models/bias_trained/fever_only/shallow \
-  --tasks_names entity_overweighting_vitc_test_5000 \
+  --tasks_names vitc-alb-base \
   --data_dir data \
   --do_predict \
   --max_seq_length 256 \
@@ -12,7 +12,7 @@ python scripts/fact_verification.py \
   --per_device_eval_batch_size 128 \
   --learning_rate 2e-5 \
   --overwrite_cache \
-  --output_dir results/shallow_preds/fever_only_shallow/entity_overweighting_vitc_test_5000/ \
+  --output_dir results/baseteachers/fever-only/vitc-train-set/1from2 \
   "$@"
 
   #--fp16 \

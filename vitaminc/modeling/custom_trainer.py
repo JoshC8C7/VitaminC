@@ -98,22 +98,24 @@ class NewTrainer(Trainer):
             biases = inputs.pop("bias")
         else:
             biases = None
-        # forward pass
-        outputs = model(**inputs)
-        logits = outputs.get("logits")
+
 
         #Need to log the bias; the loss functions from Utama et al. expect the biases to be input logged, but not the teacher probs.
-        if self.loss_fn in [losses.SmoothedDistillLoss, losses.SmoothedDistillLossAnnealed]:
-            print("Using a bias+teacher method (confidence regularization")
+        if str(self.loss_fn) in ["SmoothedDistillLoss()", "SmoothedDistillLossAnnealed()"]:
             try:
                 teaches = inputs.pop("teach")
             except:
                 raise FileExistsError('use_teach must be set for this loss function, and a teacher file provided at e.g. data/teaches/train_alb_base.json')
             #Here, biases are from the shallow model (stored on disk unlogged), and teacher_probs from a run on albert_base (stored on disk as logs)
+            # forward pass
+            outputs = model(**inputs)
+            logits = outputs.get("logits")
             loss = self.loss_fn.forward(hidden=None, logits=logits, bias=log(biases), teacher_probs=exp(teaches),
                                         labels=labels)
-            print("TEACHPROBS: ")
         else:
+            # forward pass
+            outputs = model(**inputs)
+            logits = outputs.get("logits")
             #Biases are passed as teach_probs purposefully here;
             # its because the loss functions are the same (notwithstanding the logging, discussed above). However,
             # annealed methods exist for the teacher_probs ones, but not the bias ones, so is easier to do this.

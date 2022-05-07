@@ -68,9 +68,6 @@ class VitCTrainingArgs(TrainingArguments):
         default=None, metadata={"help": "Which bias to use."}
     )
 
-    use_teach: Optional[bool] = field(
-        default=False, metadata={"help": "Whether to use teacher probabilities or not. Keep False unless using confidence regularization"}
-    )
 
 
 def main():
@@ -143,8 +140,9 @@ def main():
 
     # Get datasets
     print("TRAIN DSES: ", data_args.train_file)
+    use_teach = "conf_reg" in training_args.loss_fn
     train_dataset = (
-        VitCDataset(data_args, tokenizer=tokenizer, cache_dir=model_args.cache_dir, file_path=data_args.train_file,bias_name=training_args.bias_name, use_teach=training_args.use_teach) if training_args.do_train else None
+        VitCDataset(data_args, tokenizer=tokenizer, cache_dir=model_args.cache_dir, file_path=data_args.train_file,bias_name=training_args.bias_name, use_teach=use_teach) if training_args.do_train else None
     )
     eval_dataset = (
         VitCDataset(data_args, tokenizer=tokenizer, mode="dev", cache_dir=model_args.cache_dir, file_path=data_args.validation_file)
