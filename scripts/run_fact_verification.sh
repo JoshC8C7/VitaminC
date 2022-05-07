@@ -3,8 +3,8 @@
 set -ex
 
 python scripts/fact_verification.py \
-  --model_name_or_path models/bias_trained/fever_only/shallow \
-  --tasks_names vitc-alb-base \
+  --model_name_or_path models/bias_trained/vitc_fever/shallow \
+  --tasks_names fever-alb-base \
   --data_dir data \
   --do_predict \
   --max_seq_length 256 \
@@ -12,7 +12,8 @@ python scripts/fact_verification.py \
   --per_device_eval_batch_size 128 \
   --learning_rate 2e-5 \
   --overwrite_cache \
-  --output_dir results/baseteachers/fever-only/vitc-train-set/1from2 \
+  --loss_fn plain \
+  --output_dir results/shallow/fever-vitc/fever-train-set/0from2 \
   "$@"
 
   #--fp16 \

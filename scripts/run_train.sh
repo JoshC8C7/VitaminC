@@ -6,7 +6,7 @@ python scripts/fact_verification.py \
   --model_name_or_path albert-base-v2 \
   --tasks_names fever vitaminc \
   --loss_fn conf_reg \
-  --bias_name known_ent_overweight\
+  --bias_name shallow \
   --data_dir data \
   --do_train \
   --max_seq_length 256 \
@@ -17,7 +17,7 @@ python scripts/fact_verification.py \
   --save_step 10000 \
   --overwrite_output_dir \
   --overwrite_cache \
-  --output_dir models/bias_trained/fever_vitc/conf_reg/known_ent_overweight \
+  --output_dir models2/bias_trained/fever_vitc/shallow/known_ent_overweight \
   "$@"
 
   #--fp16 \

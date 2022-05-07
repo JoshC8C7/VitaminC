@@ -32,10 +32,7 @@ BIASES_DICT = {
     "known_neg_mismatch":"neg_overlap_biases",
     "known_range_overlap":"range_biases",
     "known_sbert_sim":"sbert_biases",
-    "self_ent_overweight":"",
-    "self_neg_mismatch":"",
-    "self_range_overlap":"",
-    "self_num_mismatch":"",
+    "shallow":"shallow"
 }
 
 def get_bias(bias_name):
