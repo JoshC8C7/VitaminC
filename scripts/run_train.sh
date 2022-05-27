@@ -3,9 +3,9 @@
 set -ex
 
 python scripts/fact_verification.py \
-  --model_name_or_path albert-base-v2 \
-  --tasks_names fever vitaminc \
-  --loss_fn conf_reg \
+  --model_name_or_path bert-base-uncased \
+  --tasks_names fever \
+  --loss_fn reweight_anneal \
   --bias_name shallow \
   --data_dir data \
   --do_train \
@@ -16,8 +16,7 @@ python scripts/fact_verification.py \
   --max_steps 50000 \
   --save_step 10000 \
   --overwrite_output_dir \
-  --overwrite_cache \
-  --output_dir models2/bias_trained/fever_vitc/shallow/known_ent_overweight \
+  --output_dir models_5/tricky_bert \
   "$@"
 
   #--fp16 \

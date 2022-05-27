@@ -6,6 +6,9 @@ import numpy as np
 import math
 
 
+def get_epoch_num(example_num):
+    return 50000 * 16 / example_num
+
 class ClfDistillLossFunction(nn.Module):
     """Torch classification debiasing loss function"""
 
@@ -204,7 +207,6 @@ class BiasProductByTeacherAnnealed(ClfDistillLossFunction):
         super().__init__()
         self.max_theta = max_theta
         self.min_theta = min_theta
-        print("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\LEAHLEAHLEAHLEAH\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n")
         self.num_train_optimization_steps = 6
         self.num_epochs = 7
         self.current_step = 0
@@ -230,13 +232,13 @@ class BiasProductByTeacherAnnealed(ClfDistillLossFunction):
 
 class ReweightByTeacherAnnealed(ClfDistillLossFunction):
     def __init__(self, max_theta=1.0, min_theta=0.8,
-                 total_steps=50000, num_epochs=3):
+                 total_steps=50000, num_epochs=5):
         super().__init__()
         self.max_theta = max_theta
         self.min_theta = min_theta
-        self.num_train_optimization_steps = 5
-        self.num_epochs = 10
-        self.current_step = 0
+        self.num_train_optimization_steps = total_steps
+        self.num_epochs = num_epochs
+        self.current_step = 40000
 
     def get_current_theta(self):
         linspace_theta = np.linspace(self.max_theta, self.min_theta,
@@ -260,8 +262,8 @@ class ReweightByTeacherAnnealed(ClfDistillLossFunction):
 
 
 class SmoothedDistillLossAnnealed(ClfDistillLossFunction):
-    def __init__(self, max_theta=1.0, min_theta=0.8,
-                 total_steps=12272, num_epochs=3):
+    def __init__(self, max_theta=0.8, min_theta=0.7,
+                 total_steps=50000, num_epochs=2):
         super().__init__()
         self.max_theta = max_theta
         self.min_theta = min_theta

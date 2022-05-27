@@ -139,8 +139,7 @@ def main():
     )
 
     # Get datasets
-    print("TRAIN DSES: ", data_args.train_file)
-    use_teach = "conf_reg" in training_args.loss_fn
+    use_teach = "conf_reg" in training_args.loss_fn if training_args.loss_fn else False
     train_dataset = (
         VitCDataset(data_args, tokenizer=tokenizer, cache_dir=model_args.cache_dir, file_path=data_args.train_file,bias_name=training_args.bias_name, use_teach=use_teach) if training_args.do_train else None
     )
@@ -171,9 +170,8 @@ def main():
 
     # Training
     if training_args.do_train:
-        trainer.train(
-            model_path=model_args.model_name_or_path if os.path.isdir(model_args.model_name_or_path) else None
-        )
+        #trainer.train(model_path=model_args.model_name_or_path if os.path.isdir(model_args.model_name_or_path) else None)
+        trainer.train(resume_from_checkpoint=True)
         trainer.save_model()
         if trainer.is_world_process_zero():
             tokenizer.save_pretrained(training_args.output_dir)

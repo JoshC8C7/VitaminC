@@ -3,17 +3,14 @@
 set -ex
 
 python scripts/fact_verification.py \
-  --model_name_or_path models/bias_trained/vitc_fever/shallow \
-  --tasks_names fever-alb-base \
+  --model_name_or_path bert-base-uncased \
   --data_dir data \
   --do_predict \
+  --test_tasks vitc-alb-base \
   --max_seq_length 256 \
-  --per_device_train_batch_size 32 \
   --per_device_eval_batch_size 128 \
-  --learning_rate 2e-5 \
   --overwrite_cache \
-  --loss_fn plain \
-  --output_dir results/shallow/fever-vitc/fever-train-set/0from2 \
+  --output_dir results2/teachbertpredsfever/vitc/1s \
   "$@"
 
   #--fp16 \

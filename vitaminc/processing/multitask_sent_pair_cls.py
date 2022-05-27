@@ -32,7 +32,10 @@ BIASES_DICT = {
     "known_neg_mismatch":"neg_overlap_biases",
     "known_range_overlap":"range_biases",
     "known_sbert_sim":"sbert_biases",
-    "shallow":"shallow"
+    "shallow":"shallow",
+    "vitc-trained-shallow":"vitc-trained-shallow",
+    "vitc-fever-trained-shallow": "vitc-fever-trained-shallow",
+    "fever-trained-shallow": "fever-trained-shallow"
 }
 
 def get_bias(bias_name):
@@ -158,6 +161,13 @@ class Split(Enum):
     dev = "dev"
     test = "test"
 
+def dataset2teach(dses):
+    if 'vitaminc' in dses and 'fever' not in dses:
+        return 'vitc'
+    elif 'vitaminc' in dses and 'fever' in dses:
+        return 'fever-vitc'
+    else:
+        return 'fever'
 
 class VitCDataset(Dataset):
     args: VitCDataTrainingArguments
